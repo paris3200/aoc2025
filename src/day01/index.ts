@@ -19,16 +19,15 @@ const parseInput = (rawInput: string) => {
 const part1 = (rawInput: string) => {
   const input = parseInput(rawInput);
 
-  let dial_value = 50;
+  let current_absolute_pos = 50;
   let zero_count = 0;
 
   for (const combination of input) {
-    dial_value = ((dial_value + combination) % 100);
+    current_absolute_pos += combination;
 
-    if (dial_value == 0) {
+    if (current_absolute_pos % 100 === 0) {
       zero_count += 1;
     }
-
   }
 
   return zero_count.toString();
