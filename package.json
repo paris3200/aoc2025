@@ -1,28 +1,31 @@
 {
-  "name": "aoc2025",
-  "version": "1.0.0",
-  "description": "Advent of Code 2025 - solutions",
-  "type": "module",
-  "scripts": {
-    "start": "aocrunner day",
-    "build": "aocrunner build",
-    "format": "prettier -w src",
-    "update:readme": "aocrunner update:readme"
-  },
-  "keywords": [
-    "aoc"
-  ],
-  "author": "Jason Paris",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/node": "^16.11.6",
-    "aocrunner": "file:../aocrunner",
-    "prettier": "^2.8.0"
-  },
-  "dependencies": {
-    "esbuild": "^0.27.0"
-  },
-  "engines": {
-    "node": ">=16.13.0"
-  }
+	"name": "aoc2025",
+	"version": "1.0.0",
+	"description": "Advent of Code 2025 - solutions",
+	"type": "module",
+	"scripts": {
+		"start": "aocrunner day",
+		"build": "aocrunner build",
+		"format": "biome format --write .",
+		"check": "biome check .",
+		"check:fix": "biome check --write .",
+		"lint": "biome lint .",
+		"update:readme": "aocrunner update:readme"
+	},
+	"keywords": [
+		"aoc"
+	],
+	"author": "Jason Paris",
+	"license": "ISC",
+	"devDependencies": {
+		"@biomejs/biome": "2.3.8",
+		"@types/node": "^16.11.6",
+		"aocrunner": "file:../aocrunner"
+	},
+	"dependencies": {
+		"esbuild": "^0.27.0"
+	},
+	"engines": {
+		"node": ">=16.13.0"
+	}
 }
