@@ -9,11 +9,11 @@ const getNeighbors = (
 	point: number[],
 	directions: number[][],
 ) => {
-	let neighbors = [];
+	const neighbors = [];
 
 	for (let i = 0; i < directions.length; i++) {
-		let targetRow = directions[i][0] + point[0];
-		let targetCol = directions[i][1] + point[1];
+		const targetRow = directions[i][0] + point[0];
+		const targetCol = directions[i][1] + point[1];
 
 		if (
 			0 <= targetRow &&
@@ -40,17 +40,17 @@ const processGrid = (grid: string[][]): [string[][], number] => {
 		[1, 1],
 	];
 
-	let rows = grid.length;
-	let cols = grid[0].length;
-	let count = 0;
-	let removed = [];
+	const rows = grid.length;
+	const cols = grid[0].length;
+	let count: number = 0;
+	const removed = [];
 
 	for (let i = 0; i < rows; i++) {
 		for (let j = 0; j < cols; j++) {
 			if (grid[i][j] === "@") {
-				let neighbors = getNeighbors(grid, [i, j], directions);
+				const neighbors = getNeighbors(grid, [i, j], directions);
 				let rolls = 0;
-				for (let point of neighbors) {
+				for (const point of neighbors) {
 					if (point === "@") {
 						rolls++;
 					}
@@ -62,7 +62,7 @@ const processGrid = (grid: string[][]): [string[][], number] => {
 			}
 		}
 	}
-	for (let point of removed) {
+	for (const point of removed) {
 		grid[point[0]][point[1]] = ".";
 	}
 
@@ -79,7 +79,7 @@ const part1 = (rawInput: string) => {
 const part2 = (rawInput: string) => {
 	let grid = parseInput(rawInput);
 	let sum = 0;
-	let count;
+	let count = 0;
 
 	do {
 		[grid, count] = processGrid(grid);
