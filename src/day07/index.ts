@@ -35,19 +35,21 @@ const part1 = (rawInput: string) => {
 
   while (points.length > 0) {
     let point = points.pop()
+    if (point != undefined) {
 
-    if (grid.has(point[0], point[1] + 1)) {
-      let char = grid.get(point[0], point[1] + 1)
-      if (char === "^") {
-        count += 1
-        points.push([point[0] - 1, point[1] + 1])
-        points.push([point[0] + 1, point[1] + 1])
-      }
-    } else {
-      grid.set(point[0], point[1] + 1, "|")
-      let nextY = point[1] + 1;
-      if (nextY < grid.size) {
-        points.push([point[0], point[1] + 1])
+      if (grid.has(point[0], point[1] + 1)) {
+        let char = grid.get(point[0], point[1] + 1)
+        if (char === "^") {
+          count += 1
+          points.push([point[0] - 1, point[1] + 1])
+          points.push([point[0] + 1, point[1] + 1])
+        }
+      } else {
+        grid.set(point[0], point[1] + 1, "|")
+        let nextY = point[1] + 1;
+        if (nextY < grid.size) {
+          points.push([point[0], point[1] + 1])
+        }
       }
     }
   }
@@ -56,66 +58,50 @@ const part1 = (rawInput: string) => {
   return count.toString();
 };
 
-const part2 = (rawInput: string) => {
-  let rawGrids = [];
-  rawGrids.push(rawInput)
-  let count = 0;
-  let divergents = new Map()
-  while (rawGrids.length > 0) {
-    let rawGrid = rawGrids.pop();
-    const { start, grid } = parseInput(rawGrid);
-    grid.print()
+const countPaths = (
+  x: number,
+  y: number,
+  grid: Grid,
+  visited: Map<string, number>
+): number => {
+  const cacheKey = key(x, y);
 
-    let points = [];
-    points.push(start)
-    grid.delete(start[0], start[1])
-
-    while (points.length > 0) {
-      let point = points.pop()
-
-      if (point != undefined) {
-
-        if (grid.has(point[0], point[1] + 1)) {
-          let char = grid.get(point[0], point[1] + 1)
-          if (char === "^") {
-
-            const keyValue = key(point[0], point[1] + 1)
-            if (divergents.get(keyValue) === undefined) {
-              divergents.set(keyValue, 1);
-              count += 1
-            } else {
-              let current = divergents.get(keyValue);
-              divergents.set(keyValue, current + 1)
-            }
-
-
-            grid.set(point[0] - 1, point[1] + 1, "S")
-            // console.log(grid.print())
-            // break;
-            rawGrids.push(grid.print())
-            grid.delete(point[0] - 1, point[1])
-
-            grid.set(point[0] + 1, point[1] + 1, "S")
-            rawGrids.push(grid.print())
-            grid.delete(point[0] + 1, point[1])
-
-            points.push([point[0] - 1, point[1] + 1])
-            points.push([point[0] + 1, point[1] + 1])
-          }
-        } else {
-          let nextY = point[1] + 1;
-          if (nextY < grid.size) {
-            grid.set(point[0], point[1] + 1, "|")
-            points.push([point[0], point[1] + 1])
-          } else {
-
-          }
-        }
-      }
-    }
+  // Check if already computed paths from this position
+  if (visited.has(cacheKey)) {
+    return visited.get(cacheKey)!;
   }
 
-  return count;
+  const nextY = y + 1;
+
+  // Grid is solved
+  if (nextY >= grid.size) {
+    visited.set(cacheKey, 1);
+    return 1;
+  }
+
+  // Grid is not solved
+  let pathCount = 0;
+
+  if (grid.has(x, nextY)) {
+    let char = grid.get(x, nextY)
+    if (char === "^") {
+      pathCount = countPaths(x - 1, nextY, grid, visited) + countPaths(x + 1, nextY, grid, visited);
+    } else {
+      pathCount = countPaths(x, nextY, grid, visited);
+    }
+  } else {
+    pathCount = countPaths(x, nextY, grid, visited);
+  }
+  visited.set(cacheKey, pathCount);
+  return pathCount;
+};
+
+const part2 = (rawInput: string) => {
+  const { start, grid } = parseInput(rawInput);
+
+  const memo = new Map<string, number>();
+  const count = countPaths(start[0], start[1], grid, memo);
+  return count.toString();
 
 };
 
@@ -174,5 +160,5 @@ run({
     solution: part2,
   },
   trimTestInputs: true,
-  onlyTests: true,
+  onlyTests: false,
 });
