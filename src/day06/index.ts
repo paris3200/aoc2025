@@ -1,149 +1,125 @@
 import run from "aocrunner";
 
-const parseInput1 = (rawInput: string) => {
-  let lines = rawInput.split("\n");
-  let operators: string[] = []
+type Operation = '*' | '+';
 
-  let operands: number[][] = []
+interface ParsedProblems {
+  problems: number[][];
+  operations: Operation[];
+}
+
+const parseInput1 = (rawInput: string): ParsedProblems => {
+  let lines = rawInput.split("\n");
+  let operations: Operation[] = []
+
+  let problems: number[][] = []
   lines.forEach((input, index) => {
     let normalizedLine = input.replace(/\s+/g, ' ').trim();
     let tokens = normalizedLine.split(" ")
 
     if (index === lines.length - 1) {
-      operators = tokens
+      operations = tokens as Operation[]
     } else {
       let numberRow: number[] = []
       tokens.forEach(token => {
         numberRow.push(Number(token))
 
       })
-      operands.push(numberRow)
+      problems.push(numberRow)
     }
   })
 
-  return { operands, operators }
+  return { problems, operations }
 }
 
-const parseInput2 = (rawInput: string) => {
-  let rawLines = rawInput.split("\n");
-  // console.log("Raw Lines:", rawLines)
-  let operators: string[] = []
-  let operandStrings: string[] = []
-  let maxLength = 0;
+const parseInput2 = (rawInput: string): ParsedProblems => {
+  const lines = rawInput.split("\n");
+  const operationLine = lines[lines.length - 1];
+  const numberLines = lines.slice(0, -1);
 
-  rawLines.forEach((line, index) => {
-    if (index === rawLines.length - 1) {
-      let normalizedLine = line.replace(/\s+/g, ' ').trim();
-      let tokens = normalizedLine.split(" ")
-      operators = tokens;
-    } else {
-      operandStrings.push(line)
-      if (line.length > maxLength) {
-        maxLength = line.length;
-      }
-    }
-  })
+  const operations = operationLine.trim().split(/\s+/) as Operation[];
+  const maxWidth = Math.max(...numberLines.map(line => line.length));
 
-
-  const filteredOperands = [];
+  const problems: number[][] = [];
   let currentProblem: number[] = [];
 
-  for (let j = maxLength - 1; j >= 0; j--) {
-    let number = "";
-    for (let i = 0; i < operandStrings.length; i++) {
-      number += operandStrings[i].charAt(j)
+  // Read columns from right to left
+  for (let col = maxWidth - 1; col >= 0; col--) {
+    let digitString = "";
+
+    // Read top to bottom in this column
+    for (const line of numberLines) {
+      digitString += line[col] || " ";
     }
 
-    if (number.trim() === "") {
+    if (digitString.trim() === "") {
+      // Empty column = problem boundary
       if (currentProblem.length > 0) {
-        filteredOperands.push(currentProblem);
+        problems.push(currentProblem);
         currentProblem = [];
       }
     } else {
-      currentProblem.push(Number(number));
+      currentProblem.push(Number(digitString));
     }
   }
 
   if (currentProblem.length > 0) {
-    filteredOperands.push(currentProblem);
+    problems.push(currentProblem);
   }
 
-  // console.log("Filtered Operands", filteredOperands)
-  // console.log("Max Length", maxLength)
-
-
-  return { operands: filteredOperands, operators };
+  return { problems, operations };
 }
 
-const translateOperands = (operands: number[][]) => {
-  let reducedOperands: number[][] = [];
+const translateProblems = (problems: number[][]) => {
+  let transposed: number[][] = [];
 
-  let count = operands[0].length
-  for (let i = 0; i < count + 1; i++) {
-    reducedOperands.push([])
+  let count = problems[0].length
+  for (let i = 0; i < count; i++) {
+    transposed.push([])
   }
 
-  for (let i = 0; i < operands.length; i++) {
-    for (let j = 0; j < operands[i].length; j++) {
-      reducedOperands[j].push(operands[i][j])
+  for (let i = 0; i < problems.length; i++) {
+    for (let j = 0; j < problems[i].length; j++) {
+      transposed[j].push(problems[i][j])
     }
   }
   // console.log("reducedOperands", reducedOperands)
-  return reducedOperands
+  return transposed
 }
 
 
-const mathOperands = (operands: number[][], operators: string[]) => {
-  operators.reverse()
-
-  // console.log("operands", operands)
-  let reducedOperands: number[] = []
-  for (let i = 0; i < operands.length; i++) {
-
-    let operator = operators.pop();
-    if (operator == "*") {
-      const product = operands[i].reduce(
-        (product, num) => product * num,
-        1,
-      );
-      reducedOperands.push(product)
-    } else {
-      const count = operands[i].reduce(
-        (sum, num) => sum + num,
-        0,
-      );
-      reducedOperands.push(count)
-    }
-  }
-
-  // console.log("reducedOperands", reducedOperands)
-  return reducedOperands;
+const mathOperands = (problems: number[][], operations: Operation[]) => {
+  return problems.map((problem, i) => {
+    const operation = operations[i];
+    return operation === "*"
+      ? problem.reduce((product, num) => product * num, 1)
+      : problem.reduce((sum, num) => sum + num, 0);
+  });
 }
 
 const part1 = (rawInput: string) => {
-  const { operands, operators } = parseInput1(rawInput);
+  const { problems, operations } = parseInput1(rawInput);
 
-  let translatedOperands = translateOperands(operands)
-  let reduced = mathOperands(translatedOperands, operators)
-  const count = reduced.reduce(
+  let translatedProblems = translateProblems(problems)
+  let answers = mathOperands(translatedProblems, operations)
+  const grandTotal = answers.reduce(
     (sum, num) => sum + num,
     0,
   );
 
-  return count.toString()
+  return grandTotal.toString()
 };
 
 const part2 = (rawInput: string) => {
-  const { operands, operators } = parseInput2(rawInput);
+  const { problems, operations } = parseInput2(rawInput);
 
-  let reduced = mathOperands(operands, operators.reverse())
+  let answers = mathOperands(problems, operations.reverse())
   // console.log(reduced)
-  const count = reduced.reduce(
+  const grandTotal = answers.reduce(
     (sum, num) => sum + num,
     0,
   );
 
-  return count.toString()
+  return grandTotal.toString()
 };
 
 run({
