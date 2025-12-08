@@ -1,5 +1,12 @@
 import run from "aocrunner";
 
+const DEBUG = false;
+const TESTS_ONLY = true;
+
+const log = (...args: any[]) => {
+  if (DEBUG) console.log(...args);
+};
+
 const parseInput = (rawInput: string) => rawInput;
 
 const part1 = (rawInput: string) => {
@@ -34,5 +41,5 @@ run({
     solution: part2,
   },
   trimTestInputs: true,
-  onlyTests: true,
+  onlyTests: TESTS_ONLY,
 });
