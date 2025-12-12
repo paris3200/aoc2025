@@ -3,7 +3,7 @@ import run from "aocrunner";
 const DEBUG = true;
 const TESTS_ONLY = true;
 
-const log = (...args: any[]) => {
+const log = (...args: unknown[]) => {
   if (DEBUG) console.log(...args);
 };
 
